@@ -18,10 +18,11 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Button } from "@/components/ui/button";
 import LoadingOverlay from "./LoadingOverlay";
 import { cn } from "@/lib/utils";
+import {DEFAULT_VOICE, ACCEPTED_PDF_TYPES, ACCEPTED_IMAGE_TYPES}from "@/lib/constants";
 
 const formSchema = z.object({
-  pdfFile: z.any().refine((file) => file instanceof File, "PDF file is required"),
-  coverImage: z.any().optional(),
+  pdfFile: z.instanceof(File, { message: "PDF file is required" }),
+  coverImage: z.instanceof(File).optional(),
   title: z.string().min(1, "Title is required"),
   author: z.string().min(1, "Author Name is required"),
   voice: z.string().min(1, "Please choose an assistant voice"),
@@ -49,9 +50,11 @@ const UploadForm = () => {
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
+      pdfFile: undefined,
+      coverImage: undefined,
       title: "",
       author: "",
-      voice: "",
+      voice: DEFAULT_VOICE,
     },
   });
 
@@ -72,6 +75,7 @@ const UploadForm = () => {
           <FormField
             control={form.control}
             name="pdfFile"
+            acceptTypes={ACCEPTED_PDF_TYPES}
             render={({ field }) => (
               <FormItem>
                 <ShadcnFormLabel className="form-label">Book PDF File</ShadcnFormLabel>
@@ -108,7 +112,7 @@ const UploadForm = () => {
                                 e.preventDefault();
                                 e.stopPropagation();
                                 setPdfName(null);
-                                field.onChange(null);
+                                field.onChange(undefined);
                               }}
                               className="upload-dropzone-remove"
                             >
@@ -135,6 +139,7 @@ const UploadForm = () => {
           <FormField
             control={form.control}
             name="coverImage"
+            acceptTypes={ACCEPTED_IMAGE_TYPES}
             render={({ field }) => (
               <FormItem>
                 <ShadcnFormLabel className="form-label">Cover Image (Optional)</ShadcnFormLabel>
@@ -171,7 +176,7 @@ const UploadForm = () => {
                                 e.preventDefault();
                                 e.stopPropagation();
                                 setCoverName(null);
-                                field.onChange(null);
+                                field.onChange(undefined);
                               }}
                               className="upload-dropzone-remove"
                             >
