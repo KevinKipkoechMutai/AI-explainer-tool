@@ -21,15 +21,19 @@ import {
   ACCEPTED_IMAGE_TYPES,
   ACCEPTED_PDF_TYPES,
 } from "@/lib/constants";
-import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import LoadingOverlay from "./LoadingOverlay";
 import FileUploader from "./FileUploader";
 import VoiceSelector from "./VoiceSelector";
+import {useAuth} from "@clerk/nextjs";
+import {toast} from "sonner";
+import {checkBookExists, createBook, saveBookSegments} from "@/lib/actions/book.actions";
+import {upload} from "@vercel/blob/client";
 
 const UploadForm = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const router = useRouter();
+  const { userId } = useAuth();
 
   const form = useForm<BookUploadFormValues>({
     resolver: zodResolver(UploadSchema),
@@ -43,19 +47,95 @@ const UploadForm = () => {
   });
 
   const onSubmit = async (values: BookUploadFormValues) => {
+    if (!userId) {
+      return toast.error("You must be logged in to upload a book.");
+    }
+
     setIsSubmitting(true);
+
     try {
-      console.log("Submitting:", values);
-      // Simulate synthesis process
-      await new Promise((resolve) => setTimeout(resolve, 3000));
-      toast.success("Book synthesized successfully!");
-      router.push("/");
+        const existsCheck = await checkBookExists(values.title);
+        if (existsCheck.exists && existsCheck.data) {
+          toast.info("Book with this title already exists.");
+          form.reset()
+            const router = useRouter();
+            router.push(`/books/${existsCheck.data.slug}`);
+            return
+        }
+
+        const fileTitle = values.title.replace(/\s+/g, '-').toLowerCase();
+        const pdfFile = values.pdfFile[0]
+        const parsedPDF = await parsePDF(pdfFile);
+
+        if (parsedPDF.content.length === 0) {
+            toast.error("PDF is empty or contains no text.");
+            return
+        }
+
+        const uploadedPDFBlob = await upload(fileTitle, pdfFile, {
+            access: 'public',
+            handleUploadUrl: '/api/upload',
+            contentType: 'application/pdf',
+        })
+
+        let coverURL: string
+
+        if (values.coverImage && values.coverImage.length > 0) {
+            const coverFile = values.coverImage[0]
+            const uploadedCoverBlob = await upload(`${fileTitle}_cover.png`, coverFile, {
+                access: 'public',
+                handleUploadUrl: '/api/upload',
+                contentType: coverFile.type,
+            })
+            coverURL = uploadedCoverBlob.url
+        } else {
+            const response = await fetch(parsedPDF.cover)
+            const blob = await response.blob()
+
+            const uploadedCoverBlob = await upload(`${fileTitle}_cover.png`, blob, {
+                access: 'public',
+                handleUploadUrl: '/api/upload',
+                contentType: 'image/png',
+            })
+            coverURL = uploadedCoverBlob.url
+        }
+
+        const book = await createBook({
+            clerkId: userId,
+            title: values.title,
+            author: values.author,
+            persona: values.persona,
+            fileUrl: uploadedPDFBlob.url,
+            fileBlobKey: uploadedPDFBlob.pathname,
+            coverURL,
+            fileSize: pdfFile.size
+        })
+
+        if (!book.success) throw new Error("Failed to create book");
+
+        if (book.alreadyExists) {
+            toast.info("Book with this title already exists.");
+            form.reset()
+            router.push(`/books/${book.data.slug}`)
+            return
+        }
+
+        const segments = await saveBookSegments(book.data._id, userId, parsedPDF.content)
+
+        if (!segments.success) {
+            toast.error("Failed to save book segments.");
+        }
+
+        form.reset()
+        router.push('/')
+
     } catch (error) {
-      console.error(error);
-      toast.error("Failed to synthesize book.");
+      console.error("Error uploading book:", error);
+      toast.error("Failed to upload book. Please try again.");
     } finally {
       setIsSubmitting(false);
     }
+
   };
 
   return (
