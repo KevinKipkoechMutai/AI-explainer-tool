@@ -29,6 +29,7 @@ import {useAuth} from "@clerk/nextjs";
 import {toast} from "sonner";
 import {checkBookExists, createBook, saveBookSegments} from "@/lib/actions/book.actions";
 import {upload} from "@vercel/blob/client";
+import {parsePDFFile} from "@/lib/utils";
 
 const UploadForm = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -58,14 +59,13 @@ const UploadForm = () => {
         if (existsCheck.exists && existsCheck.data) {
           toast.info("Book with this title already exists.");
           form.reset()
-            const router = useRouter();
             router.push(`/books/${existsCheck.data.slug}`);
             return
         }
 
         const fileTitle = values.title.replace(/\s+/g, '-').toLowerCase();
-        const pdfFile = values.pdfFile[0]
-        const parsedPDF = await parsePDF(pdfFile);
+        const pdfFile = values.pdfFile
+        const parsedPDF = await parsePDFFile(pdfFile);
 
         if (parsedPDF.content.length === 0) {
             toast.error("PDF is empty or contains no text.");
@@ -80,8 +80,8 @@ const UploadForm = () => {
 
         let coverURL: string
 
-        if (values.coverImage && values.coverImage.length > 0) {
-            const coverFile = values.coverImage[0]
+        if (values.coverImage) {
+            const coverFile = values.coverImage
             const uploadedCoverBlob = await upload(`${fileTitle}_cover.png`, coverFile, {
                 access: 'public',
                 handleUploadUrl: '/api/upload',
@@ -105,7 +105,7 @@ const UploadForm = () => {
             title: values.title,
             author: values.author,
             persona: values.persona,
-            fileUrl: uploadedPDFBlob.url,
+            fileURL: uploadedPDFBlob.url,
             fileBlobKey: uploadedPDFBlob.pathname,
             coverURL,
             fileSize: pdfFile.size
@@ -113,10 +113,10 @@ const UploadForm = () => {
 
         if (!book.success) throw new Error("Failed to create book");
 
-        if (book.alreadyExists) {
+        if (book?.alreadyExists) {
             toast.info("Book with this title already exists.");
             form.reset()
-            router.push(`/books/${book.data.slug}`)
+            router.push(`/books/${book.data._id}`)
             return
         }
 

@@ -6,7 +6,7 @@ const BookSegmentSchema = new Schema<IBookSegment>({
     bookId: {type: Schema.Types.ObjectId, ref: 'Book', required: true, index: true},
     content: {type: String, required: true},
     segmentIndex: {type: Number, required: true, index: true},
-    pageNumber: {type: Numbe, index: true},
+    pageNumber: {type: Number, index: true},
     wordCount: {type: Number, required: true},
 }, {timestamps: true})
 
