@@ -4,6 +4,7 @@ import "./globals.css";
 import Navbar from "@/components/Navbar";
 import { ClerkProvider } from '@clerk/nextjs'
 import { Toaster } from "@/components/ui/sonner";
+import { ToastListener } from "@/components/ToastListener";
 
 const ibmPlexSerif = IBM_Plex_Serif({
     variable: "--font-ibm-plex-serif",
@@ -36,6 +37,7 @@ export default function RootLayout({
         <ClerkProvider>
             <Navbar/>
             {children}
+            <ToastListener />
         </ClerkProvider>
       <Toaster/>
       </body>
