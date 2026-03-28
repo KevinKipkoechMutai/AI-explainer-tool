@@ -76,7 +76,7 @@ export const endVoiceSession = async (sessionId: string, durationSeconds: number
         return {success: false}
     }
 }
-export const getVoiceSessions = async (clerkId: string): Promise<{success: boolean, data?: any[], error?: string}> => {
+export const getVoiceSessions = async (clerkId: string): Promise<{success: boolean, data?: Record<string, unknown>[], error?: string}> => {
     try {
         await connectToDatabase()
 

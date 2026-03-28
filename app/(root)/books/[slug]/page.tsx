@@ -9,7 +9,7 @@ import { cn } from '@/lib/utils';
 import VapiControls from "@/components/VapiControls";
 
 
-const BookDetailsPage = async ({ params }: PageProps) => {
+const BookDetailsPage = async ({ params }: { params: Promise<{ slug: string }> }) => {
   const { userId } = await auth();
   if (!userId) {
     redirect('/?error=unauthorized');

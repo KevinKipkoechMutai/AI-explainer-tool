@@ -208,10 +208,13 @@ export function useVapi(book: IBook) {
         });
 
         return () => {
+            const currentSessionId = sessionIdRef.current;
+            // eslint-disable-next-line react-hooks/exhaustive-deps
+            const currentDuration = durationRef.current;
             // End active session on unmount
-            if (sessionIdRef.current) {
+            if (currentSessionId) {
                 getVapi().stop();
-                endVoiceSession(sessionIdRef.current, durationRef.current).catch((err) =>
+                endVoiceSession(currentSessionId, currentDuration).catch((err) =>
                     console.error('Failed to end voice session on unmount:', err),
                 );
                 sessionIdRef.current = null;
@@ -281,7 +284,7 @@ export function useVapi(book: IBook) {
             setStatus('idle');
             setLimitError('Failed to start voice session. Please try again.');
         }
-    }, [book._id, book.title, book.author, voice, userId]);
+    }, [book._id, book.title, book.author, voice, userId, router]);
 
     const stop = useCallback(() => {
         isStoppingRef.current = true;
