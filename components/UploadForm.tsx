@@ -56,10 +56,10 @@ const UploadForm = () => {
 
     try {
         const existsCheck = await checkBookExists(values.title);
-        if (existsCheck.exists && existsCheck.data) {
+        if (existsCheck.exists && existsCheck.book) {
           toast.info("Book with this title already exists.");
           form.reset()
-            router.push(`/books/${existsCheck.data.slug}`);
+            router.push(`/books/${existsCheck.book.slug}`);
             return
         }
 

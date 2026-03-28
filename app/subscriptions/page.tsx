@@ -19,8 +19,8 @@ const SubscriptionsPage = () => {
   ];
 
   const handlePlanAction = (planSlug: string) => {
-    // Open Clerk user profile to billing tab
-    openUserProfile({ strategy: "billing" });
+    // Open Clerk user profile
+    openUserProfile();
   };
 
   return (
