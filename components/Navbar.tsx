@@ -49,7 +49,11 @@ const Navbar = () => {
 
                     <div className="flex gap-7.5 items-center">
                         <Show when="signed-out">
-                            <SignInButton/>
+                            <SignInButton>
+                                <button className="px-4 py-2 bg-primary text-primary-foreground rounded-lg font-semibold hover:opacity-90 transition-all">
+                                    Sign In
+                                </button>
+                            </SignInButton>
                         </Show>
                         <Show when="signed-in">
                             <div className="nav-user-link">

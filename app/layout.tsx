@@ -34,7 +34,31 @@ export default function RootLayout({
       <body
         className={`${ibmPlexSerif.variable} ${monaSans.variable} relative font-sans antialiased`}
       >
-        <ClerkProvider>
+        <ClerkProvider
+            appearance={{
+                layout: {
+                    logoImageUrl: "/assets/logo.png",
+                    socialButtonsVariant: 'blockButton',
+                    shimmer: true,
+                },
+                variables: {
+                    colorPrimary: "#212a3b",
+                    colorBackground: "#ffffff",
+                    colorText: "#212a3b",
+                    colorInputBackground: "#ffffff",
+                    colorInputText: "#212a3b",
+                    borderRadius: "0.625rem",
+                },
+                elements: {
+                    card: "shadow-soft-md border border-border-subtle",
+                    headerTitle: "font-serif text-2xl font-bold",
+                    headerSubtitle: "font-sans text-muted-foreground",
+                    socialButtonsBlockButton: "border-border-medium hover:bg-secondary transition-all",
+                    formButtonPrimary: "bg-primary hover:bg-accent-warm-hover text-primary-foreground font-semibold",
+                    footerActionLink: "text-primary hover:text-accent-warm-hover font-bold",
+                }
+            }}
+        >
             <Navbar/>
             {children}
             <ToastListener />
