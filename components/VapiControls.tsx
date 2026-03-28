@@ -6,6 +6,7 @@ import {IBook} from "@/types";
 import React from "react";
 import Image from "next/image";
 import Transcript from "@/components/Transcript";
+import Link from "next/link";
 
 
 const VapiControls = ({book}: {book: IBook}) => {
@@ -16,9 +17,11 @@ const VapiControls = ({book}: {book: IBook}) => {
         currentUserMessage,
         duration,
         limitError,
+        isBillingError,
+        limits,
         start,
         stop,
-        clearErrors} = useVapi(book);
+        clearError: clearErrors} = useVapi(book);
 
 
 
@@ -57,6 +60,24 @@ const VapiControls = ({book}: {book: IBook}) => {
 
                         {/* Right: Book Info */}
                         <div className="flex-1 flex flex-col items-center sm:items-start text-center sm:text-left pt-4">
+                            {limitError && (
+                                <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-2 rounded-lg mb-4 flex items-center justify-between gap-4 w-full max-w-md">
+                                    <div className="flex flex-col gap-1">
+                                        <p className="text-sm font-medium">{limitError}</p>
+                                        {isBillingError && (
+                                            <Link href="/subscriptions" className="text-xs font-bold underline hover:text-red-800 transition-colors">
+                                                Upgrade your plan
+                                            </Link>
+                                        )}
+                                    </div>
+                                    <button
+                                        onClick={clearErrors}
+                                        className="text-red-400 hover:text-red-600 transition-colors shrink-0"
+                                    >
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+                                    </button>
+                                </div>
+                            )}
                             <h1 className="text-3xl md:text-4xl font-bold font-serif text-[var(--text-primary)] mb-1">
                                 {book.title}
                             </h1>
@@ -67,7 +88,12 @@ const VapiControls = ({book}: {book: IBook}) => {
                                 <div className="vapi-status-indicator">
                                     <span className={`vapi-status-dot vapi-status-dot-${status === 'idle' ? 'ready' : status}`} />
                                     <span className="vapi-status-text">
-                                        {(status || 'idle').charAt(0).toUpperCase() + (status || 'idle').slice(1)}
+                                        {status === 'idle' ? 'Ready' :
+                                         status === 'connecting' ? 'Connecting...' :
+                                         status === 'starting' ? 'Starting...' :
+                                         status === 'listening' ? 'Listening...' :
+                                         status === 'thinking' ? 'Thinking...' :
+                                         status === 'speaking' ? 'Speaking...' : 'Ready'}
                                     </span>
                                 </div>
                                 <div className="vapi-status-indicator">
@@ -75,7 +101,7 @@ const VapiControls = ({book}: {book: IBook}) => {
                                 </div>
                                 <div className="vapi-status-indicator">
                                     <span className="vapi-status-text">
-                                        {Math.floor(duration / 60)}:{String(duration % 60).padStart(2, '0')}/5:00
+                                        {Math.floor(duration / 60)}:{String(duration % 60).padStart(2, '0')}/{limits.minutesPerSession}:00
                                     </span>
                                 </div>
                             </div>

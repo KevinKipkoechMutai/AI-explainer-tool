@@ -116,13 +116,13 @@ export interface FileUploadFieldProps<T extends FieldValues> {
     placeholder: string;
     hint: string;
 }
-import {PLANS, PlanType} from "@/lib/subscription-constants";
+import {SUBSCRIPTION_PLANS, SubscriptionPlan} from "@/lib/subscription-constants";
 
 export interface SessionCheckResult {
     allowed: boolean;
     currentCount: number;
     limit: number;
-    plan: PlanType;
+    plan: SubscriptionPlan;
     maxDurationMinutes: number;
     error?: string;
 }
@@ -133,6 +133,7 @@ export interface StartSessionResult {
     maxDurationMinutes?: number;
     error?: string;
     isBillingError?: boolean;
+    message?: string;
 }
 
 export interface EndSessionResult {

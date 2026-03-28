@@ -9,6 +9,7 @@ import { Show, SignInButton, UserButton, useUser } from '@clerk/nextjs'
 
 const navItems = [
     { label: 'Library', href: '/' },
+    { label: 'Pricing', href: '/subscriptions' },
     { label: 'Add New', href: '/books/new' },
 ]
 
